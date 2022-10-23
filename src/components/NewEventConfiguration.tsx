@@ -106,8 +106,8 @@ function NewEventConfiguration() {
     return (
         
         <Center my={6}>
-            <HStack w='90%' justifyContent='space-between' align="start" p="2" divider={<StackDivider borderColor='gray.200' />} borderWidth={1} borderColor="gray.500" borderRadius="4px">
-                <VStack spacing={5}>
+            <HStack w='90%'  align="start" p="2" divider={<StackDivider borderColor='gray.200' />} borderWidth={1} borderColor="gray.500" borderRadius="4px">
+                <VStack w='45%' spacing={5}>
                     <Heading size='lg' >New Event Configuration</Heading>
                         
                             <VStack alignItems="start" p="5" borderWidth={1} borderColor="gray.500" borderRadius="4px">
@@ -196,15 +196,12 @@ function NewEventConfiguration() {
                         </Box>
                     
                 </VStack>
-                <VStack spacing={5} >
+                <VStack  w='45%'  alignItems="center" justify='center' spacing={5} >
                     <Heading size='lg' >Steps to follow</Heading>
                     
                     <OrderedList>
                         <ListItem>Download the event QRCode</ListItem>
-                        <ListItem>Sign the QRCode data with your private key </ListItem>
-                        <ListItem>Enter the tokenId of the NFT you hold for required NFT Contract</ListItem>
-                        <ListItem>Generate the QRCode with token Id and the signature of Event configuration</ListItem> 
-                        <ListItem>Show the generated QRCode on the event date to get access</ListItem> 
+                        
                     </OrderedList>
                     <Box borderWidth={1} borderColor="gray.500" borderRadius="4px">
                         <QRCode id="QRCode" viewBox={`0 0 256 256`} value={_configurationData}/>
