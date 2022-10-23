@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client"
 import { HashRouter, Route, Routes } from "react-router-dom"
 import EventPassGenerator from "./components/EventPassGenerator"
 import Header from "./components/header"
+import Main from "./components/Main"
 import NewEventConfiguration from "./components/NewEventConfiguration"
 import ParticipantsVerifier from "./components/ParticipantsVerifier"
 
@@ -17,6 +18,7 @@ function App() {
             <Header/>
             <hr />
             <Routes>
+            <Route path="/" element={<Main/>} />
             <Route path="/newEventConfiguration" element={<NewEventConfiguration/>} />
             <Route path="/verifyParticipants" element={<ParticipantsVerifier/>} />
             <Route path="/passGenerator" element={<EventPassGenerator/>} />
