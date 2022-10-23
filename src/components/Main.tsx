@@ -1,23 +1,14 @@
 import React from "react"
-import detectEthereumProvider from "@metamask/detect-provider"
-import { Link as RouterLink } from "react-router-dom"
 import {
     Box,
     Center,
     Code,
     Heading,
-    HStack,
-    Link,
     ListItem,
     OrderedList,
-    Tab,
-    TabList,
-    Tabs,
     Text,
     VStack,
 } from "@chakra-ui/react"
-import { hexlify } from "ethers/lib/utils"
-import { useEffect, useState } from "react"
 
 
 function Main() {
