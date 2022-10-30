@@ -1,77 +1,54 @@
-import React from "react"
+import React, { useRef } from "react"
 import {  useState } from "react"
-import detectEthereumProvider from "@metamask/detect-provider"
-import { hexlify } from "ethers/lib/utils"
-import { Box, Heading, Input, VStack,  Button, Text, HStack, StackDivider, ListItem,  Checkbox, Select, OrderedList, Center } from "@chakra-ui/react"
+import { Box, Heading, Input, VStack,  Button, Text, HStack, StackDivider, ListItem,  Checkbox, Select, OrderedList, Center, Badge, useColorModeValue, IconButton, List, useDisclosure, Flex, Divider, FormControl, FormLabel, Switch } from "@chakra-ui/react"
 import QRCode from "react-qr-code";
-import { getERC721Contract, getProvider } from "../utils/utility"
+import { FaCheckCircle, FaPlus } from "react-icons/fa"
+import ParticipantCriteriaForm from "./ParticipantCriteriaForm"
+import { useDispatch, useSelector } from "react-redux"
+import { addConfiguration, selectEventConfig } from "../appdata/dataSlice/eventConfigSlice"
+import { Criteria, EventConfiguration } from "./EventOrganizer"
 
 function NewEventConfiguration() {
-   const [_eventName, setEventName] = useState('')
-   const [_nftContractAddress, setNftContractAddress] = useState('')
-   const [_tokenContractAddress, setTokenContractAddress] = useState('')
-   const [_minTokenQuantity, setMinTokenQuantity] = useState('1')
-   const [_assetType, setAssetType] = useState('')
-   const [_chainId, setChainId] = useState('137')
-   const [_configurationData,setConfigurationData] = useState('')
-   const [_contractName, setContractName] = useState('')
-   const [_contractSymbol, setContractSymbol] = useState('')
+    const [_criteriaList,setCriteriaList] = useState<Criteria[]>([])
+    const [_eventName, setEventName] = useState('')
+    const [_eventDate, setEventDate] = useState('')
+    const [_eventLocation, setEventLocation] = useState('')
+    const [_configurationData,setConfigurationData] = useState<EventConfiguration>()
+    const refToQRCodeElement = useRef<HTMLDivElement>(null);
+    const dispatch = useDispatch()
+    const { isOpen, onOpen, onClose } = useDisclosure()
    
 
     const handleClear =()=>{
         setEventName('')
-        setNftContractAddress('')
-        setTokenContractAddress('')
-        setMinTokenQuantity('')
-        setAssetType('')
-        setChainId('')
-        setContractName('')
-        setContractSymbol('')
-        setConfigurationData('')
+        setEventDate('')
+        setEventLocation('')
+        setCriteriaList([])
+        setConfigurationData(undefined)
     }
 
-    const getNFTDetails =async (_contractAddress)=> {
-        console.log("Getting ERC721 Details")
-        const ethereum = (await detectEthereumProvider()) as any
-        try{
-            await ethereum.request({
-                method: "wallet_switchEthereumChain",
-                params: [
-                    {
-                        chainId: hexlify(Number(_chainId!)).replace("0x0", "0x")
-                    }
-                ]
-            })
-            setChainId(_chainId);
-
-        
-            const provider = getProvider(_chainId)
-            console.log(provider)
-            const erc721Contract = getERC721Contract(provider,_contractAddress)
-            const name = await erc721Contract.name()
-            setContractName(name)
-            const symbol = await erc721Contract.symbol()
-            setContractSymbol(symbol)
-            console.log(`${name} has symbol of ${symbol} `)
-        }
-        catch(e){
-
-            console.log(e)
-        }
-
-    }
-    const handleCreateConfiguration =async ()=> {
+   
+    const handleCreateConfiguration =()=> {
         console.log("Creating configuration")
-        const _contractAddress = (_assetType=="ERC721")?_nftContractAddress:(_assetType=="ERC20"?_tokenContractAddress:'')
-        const configurationJson = {
+        const configurationJson : EventConfiguration = {
             name:_eventName,
-            assetType:_assetType,
-            chain:_chainId,
-            contractAddress:_contractAddress,
-            quantity:_minTokenQuantity
+            date:_eventDate,
+            location:_eventLocation,
+            criteria : _criteriaList
         }
         console.log(JSON.stringify(configurationJson))
-        setConfigurationData(JSON.stringify(configurationJson))
+        console.log(JSON.stringify(configurationJson).length)
+        setConfigurationData(configurationJson)
+        refToQRCodeElement.current?.scrollIntoView({behavior: 'smooth'});
+
+    }
+    const handleSaveConfiguration =async ()=> {
+        console.log("Saving configuration")
+        if(_configurationData ){
+            dispatch(addConfiguration(_configurationData)) 
+
+        }
+        
 
 
     }
@@ -105,111 +82,98 @@ function NewEventConfiguration() {
     
     return (
         
-        <Center my={6}>
-            <HStack w='90%'  align="start" p="2" divider={<StackDivider borderColor='gray.200' />} borderWidth={1} borderColor="gray.500" borderRadius="4px">
-                <VStack w='45%' spacing={5}>
-                    <Heading size='lg' >New Event Configuration</Heading>
-                        
-                            <VStack alignItems="start" p="5" borderWidth={1} borderColor="gray.500" borderRadius="4px">
-                                <HStack w='100%' justifyContent='space-between'>
-                                    <Text>Enter Event Name:</Text>
-                                    <Input
-                                        htmlSize={25}
-                                        width="auto"
-                                        placeholder="Event Name"
-                                        value={_eventName}
-                                        onChange={(e) => setEventName(e.target.value)}
-                                    />
-                                </HStack>
-                                <HStack w='100%' justifyContent='space-between'> 
-                                    <Text>Accepting Asset Type:</Text>
-                                    <HStack>
-                                        <Checkbox value="ERC721" colorScheme='green' isChecked={_assetType=="ERC721"?true:false} onChange={(e) => setAssetType(e.target.value)}> 
-                                            ERC721
-                                        </Checkbox>
-                                        <Checkbox value='ERC20' colorScheme='green' isChecked={_assetType=="ERC20"?true:false} onChange={(e) => setAssetType(e.target.value)}>
-                                            ERC20
-                                        </Checkbox>
-                                    </HStack>
-                                </HStack>
-                                <HStack w='100%' justifyContent='space-between'>
-                                    <Text>Network Chain</Text>
-                                    <Select w='50%' value={_chainId} onChange={(e) => setChainId(e.target.value)}>
-                                        <option value=''>Select a network chain</option>
-                                        <option value="137">Polygon Mainnet</option>
-                                    </Select>
-                                </HStack>
-                                <HStack w='100%' justifyContent='space-between'>
-                                    <Text>Token Contract Address:</Text>
-                                    <Input
-                                        htmlSize={25}
-                                        width="auto"
-                                        placeholder="Token Contract Address"
-                                        value={_tokenContractAddress}
-                                        onChange={(e) => setTokenContractAddress(e.target.value)}
-                                        isDisabled={_assetType!="ERC20"}
-                                    />
-                                </HStack>
-                                <HStack w='100%' justifyContent='space-between'>
-                                <Text>Min Token Quantity:</Text>
-                                    <Input
-                                        htmlSize={25}
-                                        width="auto"
-                                        placeholder="Min Quantity Of Token To Hold"
-                                        value={_minTokenQuantity}
-                                        onChange={(e) => setMinTokenQuantity(e.target.value)}
-                                        isDisabled={_assetType!="ERC20"}
-                                    />
-                                </HStack>
-                                <HStack w='100%' justifyContent='space-between'>
-                                <Text>Enter NFT Contract Address:</Text>
-                                    <Input
-                                        htmlSize={25}
-                                        width="auto"
-                                        placeholder="NFT Contract Address"
-                                        value={_nftContractAddress}
-                                        onChange={(e) => {
-                                            setNftContractAddress(e.target.value)
-                                            if(e.target.value.length==42){
-                                                getNFTDetails(e.target.value)
-                                            }
-                                        }}
-                                        isDisabled={_assetType!="ERC721"}
-                                    />
-                                </HStack>
-                                <HStack w='100%' justifyContent='end'>
-                                    <Button onClick={handleClear}>Clear</Button>
-                                    <Button onClick={handleCreateConfiguration} colorScheme="green">Create</Button>
-                                </HStack>
+        <Flex justify='center' align='start' minH='80vh' my={6} bg={useColorModeValue('gray.200', 'gray.800')} mt='20' >
+            <VStack w='90%' p='3'm='2'  justify='space-between' spacing={5}>
+                    <VStack w='50%' spacing={5} align='start'p={4} borderWidth={1} borderColor="gray.500" borderRadius="4px">
+                        <Heading size='lg' >New Event Configuration</Heading>
+                        <HStack w='100%' justifyContent='start'>
+                            <Button onClick={handleClear}>Clear</Button>
+                            <Button onClick={handleCreateConfiguration} colorScheme="green">Create</Button>
+                            <Button onClick={handleSaveConfiguration} colorScheme="blue">Save</Button>
+                        </HStack>
                                 
-                            </VStack>
-                        <Box py="2">
-                            
-                                {_contractName!='' && _contractSymbol!=''?
-                                <VStack>
-                                    <Text>Contract Details</Text>
-                                    <Text>Name: {_contractName}</Text>
-                                    <Text>Symbol: {_contractSymbol}</Text>
-                                </VStack>
-                                :''}
-                            
-                        </Box>
-                    
-                </VStack>
-                <VStack  w='45%'  alignItems="center" justify='center' spacing={5} >
-                    <Heading size='lg' >Steps to follow</Heading>
-                    
-                    <OrderedList>
-                        <ListItem>Download the event QRCode</ListItem>
+                        <VStack w='70%'>
+                            <HStack w='100%' justifyContent='space-between'>
+                                <Badge fontSize='0.8em' colorScheme='green'> <Text >Event Details</Text></Badge>
+                            </HStack>
+                            <HStack w='100%' justifyContent='space-between'>
+                                <Text>Name</Text>
+                                <Input
+                                    htmlSize={25}
+                                    variant='flushed'
+                                    width="60"
+                                    placeholder="Event Name"
+                                    value={_eventName}
+                                    borderColor={useColorModeValue('gray.800', 'gray.400')}
+                                    onChange={(e) => setEventName(e.target.value)}
+                                    />  
+                            </HStack>
+                            <HStack w='100%' justifyContent='space-between'>
+                                <Text>Date</Text>
+                                <Input
+                                    htmlSize={25}
+                                    variant='flushed'
+                                    width="60"
+                                    type='datetime-local'
+                                    value={_eventDate}
+                                    borderColor={useColorModeValue('gray.800', 'gray.400')}
+                                    onChange={(e) => setEventDate(e.target.value)}
+                                    />  
+                            </HStack>
+                            <HStack w='100%' justifyContent='space-between'>
+                                <Text>Location</Text>
+                                <Input
+                                    htmlSize={25}
+                                    variant='flushed'
+                                    width="60"
+                                    placeholder="Event Location"
+                                    value={_eventLocation}
+                                    borderColor={useColorModeValue('gray.800', 'gray.400')}
+                                    onChange={(e) => setEventLocation(e.target.value)}
+                                />  
+                            </HStack>
+                        </VStack>
                         
-                    </OrderedList>
-                    <Box borderWidth={1} borderColor="gray.500" borderRadius="4px">
-                        <QRCode id="QRCode" viewBox={`0 0 256 256`} value={_configurationData}/>
-                    </Box>
-                    {_configurationData!=''?<Button onClick={onImageCownload} >Download QR</Button>:''}
+                        <VStack>    
+                            <HStack w='100%' spacing='5'>
+                                <Badge fontSize='0.8em' colorScheme='green'> <Text >Participants Criteria</Text></Badge>
+                                <IconButton icon={<FaPlus />} aria-label={"add-criteria"} onClick={onOpen}></IconButton>
+                            </HStack>
+                            
+                            {_criteriaList.length>0 ?
+                            <List w='100%' >
+                                        {_criteriaList.map((criteria,index) => (
+                                            <ListItem key={index} >
+                                                <HStack>
+                                                    <FaCheckCircle/>
+                                                    <Text fontSize='md'>Participant need to have {criteria.minTokenQuantity} {criteria.assetType} of {criteria.tokenName?criteria.tokenName:criteria.contractAddress} on {criteria.chainId} chain.</Text>
+                                                </HStack>
+                                            </ListItem>
+                                        ))}
+                            </List>
+                            :<Text fontSize='md'>No Criteria, {_eventName} open for all</Text>
+                            }
+
+                            <ParticipantCriteriaForm criteriaList={_criteriaList} isOpen={isOpen} onClose={onClose}/>
+                        </VStack>
+                    </VStack>
+                
+                <VStack ref={refToQRCodeElement}  w='50%'  align="center" justify='center'  spacing={5}>
+                {_configurationData?
+                    <Center display={_configurationData!=undefined?'block':'none'}>
+                        <VStack>
+                        <Text fontSize='0.8em' >Download the event QRCode</Text>
+                        <Box p='3' borderWidth={1} borderColor="gray.500" bg='white' borderRadius="4px">
+                            <QRCode id="QRCode" viewBox={`0 0 256 256`} value={JSON.stringify(_configurationData)}/>
+                        </Box>
+                        {_configurationData?<Button onClick={onImageCownload} >Download QR</Button>:''}
+                        </VStack>
+                    </Center>
+                    :<></>
+                }     
                 </VStack>
-            </HStack>
-        </Center>
+            </VStack>
+        </Flex>
         
     )
 }
