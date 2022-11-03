@@ -1,4 +1,4 @@
-# air-gapped-token-verification
+# 3ET (WEB3 EVENT TICKET) : air-gapped-token-verification 
  Simplified wallet asset verification process where the assets that need to be verified can only be accessed on a separate “air gapped” system.
  
  ## Install
