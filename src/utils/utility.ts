@@ -38,7 +38,6 @@ export const getERC1155Contract = (_ethereum: any, _contractAddress) => {
     const ethersProvider = new providers.Web3Provider(_ethereum)
     return new Contract(_contractAddress!, ERC1155_ABI, ethersProvider.getSigner())
 }
-export const getERC20Contract = (_ethereum: any, _contractAddress) => {
-    const ethersProvider = new providers.Web3Provider(_ethereum)
-    return new Contract(_contractAddress!, ERC20_ABI, ethersProvider.getSigner())
+export const getERC20Contract = (_ethersProvider: any, _contractAddress) => {
+    return new Contract(_contractAddress!, ERC20_ABI, _ethersProvider)
 }

@@ -13,18 +13,9 @@ import { AiFillCloseCircle } from "react-icons/ai"
 import { EventPass } from "./EventPassGenerator"
 
 function ParticipantsVerifier() {
-    const [_eventName, setEventName] = useState('')
-    const [_contractAddress, setContractAddress] = useState('')
     const [_contractName, setContractName] = useState('')
-    const [_contractSymbol, setContractSymbol] = useState('')
-    const [_minTokenQuantity, setMinTokenQuantity] = useState('')
-    const [_assetType, setAssetType] = useState('')
-    const [_chainId, setChainId] = useState('')
     const [_scanQrCode,setScanQrCode] = useState(false)
-    const [_scannedDetails,setScannedDetails]= useState('')
     const [_verificationResult, setVerificationResult] = useState('')
-    const [_tokenId,setTokenId] = useState('')
-    const [_tokenOwnerAddress,setTokenOwnerAddress] = useState('')
 
     const _appEventConfigs = useSelector(selectEventConfig)
     const [_selectedEventIndex,setSelectedEventIndex] = useState('')
@@ -56,6 +47,18 @@ function ParticipantsVerifier() {
         return false;
 
     }
+
+    const getSignerAddress = (_signature,_message) =>{
+        try{
+            const signerAddress =  ethers.utils.verifyMessage(_message,_signature)
+            console.log("SignerAddress : "+signerAddress)
+            return signerAddress
+        }
+        catch(e){
+            console.log(e)
+        }
+        
+    }
     const handleQRScannerResult = async (result, error) => {
         if (!!result) {
             console.log(result?.getText());
@@ -69,10 +72,12 @@ function ParticipantsVerifier() {
                 && _selectedEventConfig?.location== eventPassConfiguration.location 
                 && _selectedEventConfig.date == eventPassConfiguration.date 
                 && _selectedEventConfig.criteria.length == eventPassConfiguration.criteria.length ){
-                   
+                  
                     if(eventPassConfiguration.criteria != null){
+                        
                         var criteriaSuccessfull =   await eventPassConfiguration.criteria.map(
                             async (criteria,index) =>{
+                                
                                 if(criteria.assetType == 'ERC721' 
                                     && criteria.tokenId 
                                     && _selectedEventConfig.criteria[index].contractAddress == criteria.contractAddress
@@ -83,20 +88,26 @@ function ParticipantsVerifier() {
                                     const verificationResult = verifyMessage(qrCodeData.signature,_owner,qrCodeData.eventConfiguration)
                                     console.log(`Criteria ${index} : ${verificationResult}`)
                                     return verificationResult
-                                }else if(criteria.assetType == 'ERC20' && criteria.accountAddress
+                                }else if(criteria.assetType == 'ERC20' 
                                             && _selectedEventConfig.criteria[index].contractAddress == criteria.contractAddress
                                             && _selectedEventConfig.criteria[index].assetType == criteria.assetType
                                             && _selectedEventConfig.criteria[index].chainId == criteria.chainId){
-
-                                    const decimal =  await getERC20TokenDecimal(criteria.contractAddress,criteria.chainId)
-                                    const _balance = await getERC20Balance(criteria.contractAddress,criteria.chainId,criteria.accountAddress)
-                                    if(decimal && _balance){
-                                
-                                
-                                    return  ((_balance! >= (parseInt(criteria.minTokenQuantity) * (10**decimal!))) &&
-                                            verifyMessage(qrCodeData.signature,criteria.accountAddress,qrCodeData.eventConfiguration))
-                                
-                                    } 
+                                                console.log("Criteria for ERC20")
+                                    
+                                    const signerAddress = getSignerAddress(qrCodeData.signature,qrCodeData.eventConfiguration)
+                                    if(signerAddress){
+                                        
+                                        const _balance = await getERC20Balance(criteria.contractAddress,criteria.chainId,signerAddress)
+                                        console.log("Balance :"+_balance)
+                                        const decimal =  await getERC20TokenDecimal(criteria.contractAddress,criteria.chainId)
+                                        console.log("Decimal :"+decimal)
+                                        if(decimal && _balance){
+                                    
+                                    
+                                        return  (_balance! >= (parseInt(criteria.minTokenQuantity) * (10**decimal!)))
+                                    
+                                        } 
+                                    }
                                 }
                                 else{
                                     return false
@@ -127,7 +138,7 @@ function ParticipantsVerifier() {
         }
 
         if (!!error) {
-            console.info(error);
+            //console.info(error);
             
         }
     }
@@ -138,6 +149,8 @@ function ParticipantsVerifier() {
             const provider = getProvider(_chainId)
             console.log(provider)
             const erc721Contract = getERC721Contract(provider,_contractAddress)
+            const name = await erc721Contract.name()
+            setContractName(name)
             const ownerAddress:string = await erc721Contract.ownerOf(tokenId)
             console.log(`Owner of ${tokenId} is ${ownerAddress} `)
             return ownerAddress
@@ -155,6 +168,9 @@ const getERC20Balance = async (_contractAddress: string, _chainId: string, accou
         const provider = getProvider(_chainId)
         console.log(provider)
         const erc20Contract = getERC20Contract(provider,_contractAddress)
+        console.log(erc20Contract)
+        const name = await erc20Contract.name()
+        setContractName(name)
         const balance:number = await erc20Contract.balanceOf(accountAddress)
         console.log(`Balance of ${accountAddress} address is ${balance} `)
         return balance
@@ -180,20 +196,7 @@ const getERC20TokenDecimal = async (_contractAddress: string, _chainId: string) 
         console.log(e)
     }
  }
-    const handleClear =()=>{
-        setEventName('')
-        setContractAddress('')
-        setMinTokenQuantity('')
-        setAssetType('')
-        setChainId('')
-        setContractName('')
-        setContractSymbol('')
-        setScannedDetails('')
-        setScanQrCode(false)
-        setVerificationResult('')
-        setTokenId('')
-        setTokenOwnerAddress('')
-    }
+   
    
     return (
         
