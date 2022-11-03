@@ -44,7 +44,7 @@ interface CriteriaCheckList{
                             ...criteria,
                             tokenId:_tokenIds[index]
                     }
-                    console.log("Updated : "+updatedcriteria)
+                    console.log("Updated : "+JSON.stringify(updatedcriteria))
                     return updatedcriteria
                 }
                 else{
@@ -52,8 +52,8 @@ interface CriteriaCheckList{
                 }
             
         })
-        console.log("All Criteria's after update: "+updatedCriterias)
-        updatedEventConfig.criteria = updatedCriterias
+        console.log("All Criteria's after update: "+JSON.stringify(updatedCriterias))
+        updatedEventConfig = {...updatedEventConfig , criteria:updatedCriterias}
         console.log(updatedEventConfig)
         generatePass(updatedEventConfig) 
         }

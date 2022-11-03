@@ -1,6 +1,6 @@
 import React, { useRef } from "react"
 import {  useState } from "react"
-import { Box, Heading, Input, VStack,  Button, Text, HStack, StackDivider, ListItem,  Checkbox, Select, OrderedList, Center, Badge, useColorModeValue, IconButton, List, useDisclosure, Flex, Divider, FormControl, FormLabel, Switch } from "@chakra-ui/react"
+import { Box, Heading, Input, VStack,  Button, Text, HStack, StackDivider, ListItem,  Checkbox, Select, OrderedList, Center, Badge, useColorModeValue, IconButton, List, useDisclosure, Flex, Divider, FormControl, FormLabel, Switch, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, Alert, AlertIcon, AlertTitle, AlertDescription } from "@chakra-ui/react"
 import QRCode from "react-qr-code";
 import { FaCheckCircle, FaPlus } from "react-icons/fa"
 import ParticipantCriteriaForm from "./ParticipantCriteriaForm"
@@ -14,6 +14,7 @@ function NewEventConfiguration() {
     const [_eventDate, setEventDate] = useState('')
     const [_eventLocation, setEventLocation] = useState('')
     const [_configurationData,setConfigurationData] = useState<EventConfiguration>()
+    const [_configurationSaved, setConfigurationSaved] = useState<boolean>(false)
     const refToQRCodeElement = useRef<HTMLDivElement>(null);
     const dispatch = useDispatch()
     const { isOpen, onOpen, onClose } = useDisclosure()
@@ -25,6 +26,7 @@ function NewEventConfiguration() {
         setEventLocation('')
         setCriteriaList([])
         setConfigurationData(undefined)
+        setConfigurationSaved(false)
     }
 
    
@@ -46,7 +48,7 @@ function NewEventConfiguration() {
         console.log("Saving configuration")
         if(_configurationData ){
             dispatch(addConfiguration(_configurationData)) 
-
+            setConfigurationSaved(true)
         }
         
 
@@ -86,11 +88,31 @@ function NewEventConfiguration() {
             <VStack w='90%' p='3'm='2'  justify='space-between' spacing={5}>
                     <VStack w='50%' spacing={5} align='start'p={4} borderWidth={1} borderColor="gray.500" borderRadius="4px">
                         <Heading size='lg' >New Event Configuration</Heading>
-                        <HStack w='100%' justifyContent='start'>
-                            <Button onClick={handleClear}>Clear</Button>
-                            <Button onClick={handleCreateConfiguration} colorScheme="green">Create</Button>
-                            <Button onClick={handleSaveConfiguration} colorScheme="blue">Save</Button>
+                        <HStack w='100%' justify='space-between'>
+                            <HStack  justifyContent='start'>
+                                <Button onClick={handleClear}>Clear</Button>
+                                <Button onClick={handleCreateConfiguration} colorScheme="green">Create</Button>
+                                <Button onClick={handleSaveConfiguration} isDisabled={_configurationData?false:true} colorScheme="blue">Save</Button>
+                            </HStack>
+                            {_configurationSaved?
+                            <Alert
+                                status='success'
+                                variant='subtle'
+                                alignItems='center'
+                                justifyContent='center'
+                                textAlign='center'
+                                >
+                                <AlertIcon boxSize='20px' mr={0} />
+                                <AlertTitle  fontSize='lg'>
+                                    Saved
+                                </AlertTitle>
+                            </Alert>
+                            :
+                                <></>
+                            }
+                            
                         </HStack>
+                        
                                 
                         <VStack w='70%'>
                             <HStack w='100%' justifyContent='space-between'>
@@ -146,7 +168,7 @@ function NewEventConfiguration() {
                                             <ListItem key={index} >
                                                 <HStack>
                                                     <FaCheckCircle/>
-                                                    <Text fontSize='md'>Participant need to have {criteria.minTokenQuantity} {criteria.assetType} of {criteria.tokenName?criteria.tokenName:criteria.contractAddress} on {criteria.chainId} chain.</Text>
+                                                    <Text fontSize='md'>Participant need to have {criteria.minTokenQuantity} {criteria.assetType} of {criteria.tokenName?criteria.tokenName:criteria.contractAddress} on chainId {criteria.chainId} .</Text>
                                                 </HStack>
                                             </ListItem>
                                         ))}
@@ -172,6 +194,7 @@ function NewEventConfiguration() {
                     :<></>
                 }     
                 </VStack>
+                
             </VStack>
         </Flex>
         

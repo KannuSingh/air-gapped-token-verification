@@ -3,7 +3,7 @@ import {  useState } from "react"
 import detectEthereumProvider from "@metamask/detect-provider"
 import { hexlify } from "ethers/lib/utils"
 import { Box, Heading, Input, VStack,  Button, Text, HStack, StackDivider, ListItem,  Checkbox, Select, OrderedList, Center, useColorModeValue, Icon, Slide, FormControl, FormLabel, FormHelperText, Badge, IconButton, InputGroup, InputRightElement, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, RadioGroup, Stack, Radio } from "@chakra-ui/react"
-import { getERC721Contract, getProvider } from "../utils/utility"
+import { getERC20Contract, getERC721Contract, getProvider } from "../utils/utility"
 import { Criteria } from "./EventOrganizer"
 
 interface ParticipantCriteriaFormProps{
@@ -25,37 +25,37 @@ function ParticipantCriteriaForm({criteriaList, isOpen, onClose }:ParticipantCri
 
     const handleClear =()=>{
         setContractAddress('')
-        setMinTokenQuantity('')
-        setAssetType('')
-        setChainId('')
+        setMinTokenQuantity('1')
+        setAssetType('ERC721')
+        setChainId('137')
         setContractName('')
         setContractSymbol('')
         setConfigurationData('')
     }
 
-    const getNFTDetails =async (_contractAddress)=> {
-        console.log("Getting ERC721 Details")
+    const getContractDetails =async (_contractAddress)=> {
+        console.log("Getting Contract Details")
         const ethereum = (await detectEthereumProvider()) as any
         try{
-            await ethereum.request({
-                method: "wallet_switchEthereumChain",
-                params: [
-                    {
-                        chainId: hexlify(Number(_chainId!)).replace("0x0", "0x")
-                    }
-                ]
-            })
-            setChainId(_chainId);
-
-        
             const provider = getProvider(_chainId)
             console.log(provider)
-            const erc721Contract = getERC721Contract(provider,_contractAddress)
-            const name = await erc721Contract.name()
-            setContractName(name)
-            const symbol = await erc721Contract.symbol()
-            setContractSymbol(symbol)
-            console.log(`${name} has symbol of ${symbol} `)
+            if(_assetType=='ERC721'){
+                const erc721Contract = getERC721Contract(provider,_contractAddress)
+                const name = await erc721Contract.name()
+                setContractName(name)
+                const symbol = await erc721Contract.symbol()
+                setContractSymbol(symbol)
+                console.log(`${name} has symbol of ${symbol} `)
+            }else if(_assetType=='ERC20'){
+                const erc20Contract = getERC20Contract(provider,_contractAddress)
+                const name = await erc20Contract.name()
+                setContractName(name)
+                const symbol = await erc20Contract.symbol()
+                setContractSymbol(symbol)
+                console.log(`${name} has symbol of ${symbol} `)
+            }
+            
+            
         }
         catch(e){
 
@@ -98,13 +98,15 @@ function ParticipantCriteriaForm({criteriaList, isOpen, onClose }:ParticipantCri
                                         <Text>Network Chain</Text>
                                         <Select  borderColor={useColorModeValue('gray.800', 'gray.400')} variant='flushed' width="60" value={_chainId} placeholder='Select a network chain' onChange={(e) => setChainId(e.target.value)}>
                                             <option value="137">Polygon Mainnet</option>
+                                            <option value="5">Goerli Testnet</option>
                                         </Select>
                                     </HStack>
                                     <HStack w='100%' justifyContent='space-between'>
                                     <Text>Contract Address</Text>
                                     <InputGroup size='md' width="60">
                                         <Input
-                                            htmlSize={25}
+                                            htmlSize={50}
+                                            //pr={_chainId!=''?'4.5rem':''}
                                             variant='flushed'
                                             borderColor={useColorModeValue('gray.800', 'gray.400')}
                                             placeholder="Contract Address"
@@ -114,11 +116,15 @@ function ParticipantCriteriaForm({criteriaList, isOpen, onClose }:ParticipantCri
                                             }}
                                         
                                         />
-                                        <InputRightElement width='4.5rem'>
-                                            <Button size='xs' onClick={getNFTDetails}>
-                                                validate
-                                            </Button>
-                                        </InputRightElement>
+                                        {/*_chainId!=''
+                                        ?<>
+                                            <InputRightElement width='4.5rem'>
+                                                <Button size='xs' onClick={getContractDetails}>
+                                                    validate
+                                                </Button>
+                                            </InputRightElement>
+                                        </>:<></>*/}
+                                        
                                     </InputGroup>
                                         
                                     </HStack>

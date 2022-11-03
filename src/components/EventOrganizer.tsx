@@ -11,6 +11,7 @@ import { addConfiguration, selectEventConfig } from "../appdata/dataSlice/eventC
 import { NavLink } from "react-router-dom";
 
 export interface Criteria{
+    accountAddress?: string;
     contractAddress:string
     assetType:string
     chainId:string

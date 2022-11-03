@@ -44,35 +44,7 @@ function Header() {
             to={'/'}>
             Home
           </Button>
-          {path.includes('/eventorganizer')?
-            <>
-             <Button
-            as={RouterLink}
-            fontSize={'sm'}
-            fontWeight={400}
-            variant={'link'}
-            to={"/neweventconfiguration"}>
-            Create Event Configuration
-          </Button>
-           <Button
-           as={RouterLink}
-           fontSize={'sm'}
-           fontWeight={400}
-           variant={'link'}
-           to={"/verifyParticipants"}>
-           Verify Event Pass
-         </Button>
-            </>:<></>}
-            {path.includes('/eventparticipant')? 
-              <Button
-                as={RouterLink}
-                fontSize={'sm'}
-                fontWeight={400}
-                variant={'link'}
-                to={"/passGenerator"}>
-                Generate Event Pass
-              </Button>
-            :<></>}
+          
             <Button
                 as={RouterLink}
                 fontSize={'sm'}

@@ -18,6 +18,11 @@ enum Permission{
     GRANTED, NOTGRANTED, WAITING
 }
 
+export interface EventPass{
+    eventConfiguration: string
+    signature:string
+}
+
 function EventPassGenerator() {
     const _appEventConfigs = useSelector(selectEventConfig)
     let query = useQuery();
@@ -61,19 +66,7 @@ function EventPassGenerator() {
         if (!!result) {
             const qrCodeData :EventConfiguration= JSON.parse(result?.getText())
             setScanQrCode(false)
-          //  setScannedDetails(result?.getText())
             setEventConfig(qrCodeData)
-           // setEventName(qrCodeData.name)
-            
-         /*   if(qrCodeData.assetType=='ERC721'){
-               // getNFTDetails(qrCodeData.contractAddress,qrCodeData.chain)
-             }else if(qrCodeData.assetType=='ERC1155'){
-                 
-                
-             } else if(qrCodeData.assetType=='ERC20'){
-                 
-                     
-             }*/
             console.log(qrCodeData);
         }
 
@@ -106,16 +99,19 @@ function EventPassGenerator() {
     
     const handlePassGeneration = async (eventConfig:EventConfiguration)=>{
             try{
+                console.log(`final event config : ${JSON.stringify(eventConfig)}`)
                 const ethereum = (await detectEthereumProvider()) as any
                 var signature: string = await ethereum.request({
                     method: "personal_sign",
                     params: [JSON.stringify(eventConfig), _accounts[0]]
                 })
-                var finalPassData={}
-                finalPassData['passDetails'] = JSON.stringify(eventConfig)
-                finalPassData['signature'] = signature
+                var finalPassData:EventPass={
+                    eventConfiguration:JSON.stringify(eventConfig),
+                    signature:signature
+                }
                    
                 setPassValue(JSON.stringify(finalPassData))
+                console.log(`final pass : ${JSON.stringify(finalPassData)}`)
                 console.log(JSON.stringify(finalPassData).length)
                 onClose()
             }catch(e){

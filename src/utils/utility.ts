@@ -20,8 +20,10 @@ export const getSigner = (_ethereum: any) => {
 }
 export const getProvider = (_chainId:string) =>{
     if(_chainId == '137'){
-        console.log("POLYGON_URL"+process.env.POLYGON_URL)
         return new providers.JsonRpcProvider(process.env.POLYGON_URL)
+    }
+    if(_chainId == '5'){
+        return new providers.JsonRpcProvider(process.env.GOERLI_URL)
     }
     console.log(`${_chainId}`)
     return new providers.Web3Provider(ethereum!);
