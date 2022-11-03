@@ -4,6 +4,7 @@ import {
     Button,
     Heading,
     HStack,
+    Link,
     Text,
     useColorModeValue,
     VStack,
@@ -46,11 +47,11 @@ function Header() {
           </Button>
           
             <Button
-                as={RouterLink}
+                as={Link}
                 fontSize={'sm'}
                 fontWeight={400}
                 variant={'link'}
-                to={"/guide"}>
+                href={"https://github.com/KannuSingh/air-gapped-token-verification"}>
                 Guide
               </Button>
          
