@@ -36,15 +36,15 @@
     "react-typeform": "^1.0.3",
     "redux-persist": "^6.0.0",
     "stream-browserify": "^3.0.0",
-    "write-json-file": "^5.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^18.11.3",
-    "buffer": "^6.0.3",
-    "gh-pages": "^4.0.0",
+    "write-json-file": "^5.0.0",
     "parcel": "^2.7.0",
     "parcel-plugin-static-files-copy": "^2.6.0",
+    "buffer": "^6.0.3",
+    "gh-pages": "^4.0.0",
     "process": "^0.11.10"
+  },
+  "devDependencies": {
+   
   },
   "staticFiles": {
     "staticPath": "public",
